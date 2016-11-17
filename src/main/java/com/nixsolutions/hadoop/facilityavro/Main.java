@@ -97,6 +97,7 @@ public class Main {
         flowDef.setAssertionLevel(AssertionLevel.VALID);
         wcFlow.complete();
         fileWriter.close();
+        fs.delete(tmp);
         fsOut.close();
     }
 
