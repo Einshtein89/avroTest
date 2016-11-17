@@ -40,18 +40,17 @@ import cascading.tuple.TupleEntry;
  */
 public class Main {
 
-    static Facility facility = new Facility();
-    static DatumWriter<Facility> datumWriter = new SpecificDatumWriter<Facility>(
+    private static Facility facility = new Facility();
+    private static DatumWriter<Facility> datumWriter = new SpecificDatumWriter<Facility>(
             Facility.class);
-    static DataFileWriter<Facility> fileWriter = new DataFileWriter<Facility>(
+    private static DataFileWriter<Facility> fileWriter = new DataFileWriter<Facility>(
             datumWriter);
 
     public static void main(String[] args) throws IOException {
         if (args.length != 2) {
-            System.out.println(
-                    "Usage : HadoopDFSFileReadWrite <inputfile> <output file>");
-            System.exit(1);
+            usage();
         }
+
         Properties properties = new Properties();
         AppProps.setApplicationJarClass(properties, Main.class);
         AppProps.addApplicationTag(properties, "tutorials");
@@ -59,36 +58,34 @@ public class Main {
         AppProps.setApplicationName(properties, "facility");
         Hadoop2MR1FlowConnector flowConnector = new Hadoop2MR1FlowConnector(
                 properties);
-        Configuration config = new Configuration();
-        config.addResource(new Path("/HADOOP_HOME/conf/core-site.xml"));
-        config.addResource(new Path("/HADOOP_HOME/conf/hdfs-site.xml"));
-
         // Input file
         String inputPath = args[0];
         // Output file
         String outputPath = args[1];
 
+        Configuration config = new Configuration();
+        config.addResource(new Path("/HADOOP_HOME/conf/core-site.xml"));
+        config.addResource(new Path("/HADOOP_HOME/conf/hdfs-site.xml"));
+
         FileSystem fs = FileSystem.get(config);
 
         Path fileNamePath = new Path("" + outputPath + "/facility.avro");
+
         FSDataOutputStream fsOut = null;
         try {
             if (fs.exists(fileNamePath)) {
                 fs.delete(fileNamePath, true);
             }
-            fsOut = fs.create(fileNamePath, true);
+            fsOut = fs.create(fileNamePath);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            // TODO: handle exception
         }
-
         // create the source tap
         Tap<?, ?, ?> source = new Hfs(new TextLine(), inputPath);
 
         // Create a sink tap to write to the Hfs; by default, TextDelimited
         // writes all fields out
-        Path tmp = new Path("/tmp");
-
-        Tap<?, ?, ?> sink = new Hfs(new TextDelimited(true, "\t"), "tmp",
+        Tap<?, ?, ?> sink = new Hfs(new TextDelimited(true, "\t"), "Tmp",
                 SinkMode.REPLACE);
 
         // create the job definition, and run it
@@ -97,14 +94,20 @@ public class Main {
         flowDef.setAssertionLevel(AssertionLevel.VALID);
         wcFlow.complete();
         fileWriter.close();
-        fs.delete(tmp);
+        fsOut.flush();
         fsOut.close();
     }
 
-    public static FlowDef fileProcessing(Tap<?, ?, ?> source, Tap<?, ?, ?> sink,
-            OutputStream out) throws IOException {
+    static void usage() {
+        System.out.println(
+                "Usage : HadoopDFSFileReadWrite <inputfile> <outputfile>");
+        System.exit(1);
+    }
 
-        fileWriter.create(facility.getSchema(), out);
+    public static FlowDef fileProcessing(Tap<?, ?, ?> source, Tap<?, ?, ?> sink,
+            OutputStream fsOut) throws IOException {
+
+        fileWriter.create(facility.getSchema(), fsOut);
         Pipe pipe = new Each("split", new Fields("line"),
                 new FileProcessing(new Fields("line")), Fields.SWAP);
 
@@ -114,12 +117,12 @@ public class Main {
                 .addSink(pipe, sink);
     }
 
-    // inner class for writing avro file based on input file
     public static class FileProcessing extends BaseOperation
             implements Function {
 
         public FileProcessing(Fields fieldDeclaration) throws IOException {
             super(1, fieldDeclaration);
+
         }
 
         @Override
@@ -149,7 +152,7 @@ public class Main {
                     }
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+
             }
             return text;
         }

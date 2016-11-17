@@ -1,3 +1,30 @@
+
+Skip to content
+This repository
+
+    Pull requests
+    Issues
+    Gist
+
+    @Einshtein89
+
+1
+0
+
+    0
+
+Beletskyy/HadoopTestFacilityAvro
+Code
+Issues 0
+Pull requests 0
+Projects 0
+Wiki
+Pulse
+Graphs
+HadoopTestFacilityAvro/build.gradle
+2a7548e a minute ago
+Vyacheslav Biletskiy asasas
+82 lines (68 sloc) 2.36 KB
 buildscript {
   repositories {
   jcenter()	
@@ -27,7 +54,7 @@ apply plugin: 'avro-gradle-plugin'
 
 archivesBaseName = 'facility'
 
-ext.cascadingVersion = '3.1.2'
+ext.cascadingVersion = '3.0.0'
 ext.hadoopVersion = '2.7.3'
 
 // Change setting to 1.6 if you want to build with Java 6
@@ -56,7 +83,7 @@ dependencies {
   compile( group: 'cascading', name: 'cascading-core', version: cascadingVersion )
   compile( group: 'cascading', name: 'cascading-local', version: cascadingVersion )
   compile( group: 'cascading', name: 'cascading-hadoop2-mr1', version: cascadingVersion )
-  compile( group: 'cascading', name: 'cascading-expression', version: cascadingVersion )
+  /*compile( group: 'cascading', name: 'cascading-expression', version: cascadingVersion )*/
 
   provided( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoopVersion )
   provided( group: 'org.apache.hadoop', name: 'hadoop-client', version: hadoopVersion )
@@ -67,13 +94,21 @@ jar {
   description = "Assembles a Hadoop ready jar file"
   doFirst {
     into( 'lib' ) {
-      from { configurations.compile.minus( [configurations.provided] ) }
+      /*from { configurations.compile.minus( [configurations.provided] ) }*/
+      from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+      }
     }
   }
 
   manifest {
     attributes( "Main-Class": "com/nixsolutions/hadoop/facilityavro/Main" )
   }
-  
-  
 }
+
+    Contact GitHub API Training Shop Blog About 
+
+    © 2016 GitHub, Inc. Terms Privacy Security Status Help 
+
