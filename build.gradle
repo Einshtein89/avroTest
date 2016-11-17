@@ -31,8 +31,8 @@ ext.cascadingVersion = '3.1.2'
 ext.hadoopVersion = '2.7.3'
 
 // Change setting to 1.6 if you want to build with Java 6
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 dependencies {
   compileAvro
