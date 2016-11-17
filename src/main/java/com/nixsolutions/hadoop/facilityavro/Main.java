@@ -87,7 +87,7 @@ public class Main {
         // Create a sink tap to write to the Hfs; by default, TextDelimited
         // writes all fields out
         Path tmp = new Path("tmp");
-        fs.delete(tmp);
+
         Tap<?, ?, ?> sink = new Hfs(new TextDelimited(true, "\t"), "tmp",
                 SinkMode.REPLACE);
 
@@ -97,6 +97,7 @@ public class Main {
         flowDef.setAssertionLevel(AssertionLevel.VALID);
         wcFlow.complete();
         fileWriter.close();
+        fs.delete(tmp);
         fsOut.close();
     }
 
