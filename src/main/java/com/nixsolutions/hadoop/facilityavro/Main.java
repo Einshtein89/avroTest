@@ -50,7 +50,9 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         if (args.length != 2) {
-            usage();
+            System.out.println(
+                    "Usage : HadoopDFSFileReadWrite <inputfile> <output file>");
+            System.exit(1);
         }
         Properties properties = new Properties();
         AppProps.setApplicationJarClass(properties, Main.class);
@@ -59,32 +61,26 @@ public class Main {
         AppProps.setApplicationName(properties, "facility");
         Hadoop2MR1FlowConnector flowConnector = new Hadoop2MR1FlowConnector(
                 properties);
+        Configuration config = new Configuration();
+        config.addResource(new Path("/HADOOP_HOME/conf/core-site.xml"));
+        config.addResource(new Path("/HADOOP_HOME/conf/hdfs-site.xml"));
+
         // Input file
         String inputPath = args[0];
         // Output file
         String outputPath = args[1];
 
-        Configuration config = new Configuration();
-        config.addResource(new Path("/HADOOP_HOME/conf/core-site.xml"));
-        config.addResource(new Path("/HADOOP_HOME/conf/hdfs-site.xml"));
-
         FileSystem fs = FileSystem.get(config);
 
-        // Path outputtmp = new Path("/sdfsdf/sdfsdf");
         Path fileNamePath = new Path("" + outputPath + "/facility.avro");
         FSDataOutputStream fsOut = null;
         try {
             if (fs.exists(fileNamePath)) {
                 fs.delete(fileNamePath, true);
             }
-            // fs.create(outputtmp);
             fsOut = fs.create(fileNamePath, true);
-            // FSDataOutputStream fin = fs.create(fileNamePath);
-            // fin.writeUTF("hello");
-            // fin.writeChars("sdsdf");
-            // fin.close();
         } catch (Exception e) {
-            // TODO: handle exception
+            throw new RuntimeException(e);
         }
 
         // create the source tap
@@ -95,7 +91,6 @@ public class Main {
         Tap<?, ?, ?> sink = new Hfs(new TextDelimited(true, "\t"), "output",
                 SinkMode.REPLACE);
 
-        // new File(outputPath).mkdir();
         // create the job definition, and run it
         FlowDef flowDef = Main.fileProcessing(source, sink, fsOut);
         Flow wcFlow = flowConnector.connect(flowDef);
@@ -103,12 +98,6 @@ public class Main {
         wcFlow.complete();
         fileWriter.close();
         fsOut.close();
-    }
-
-    static void usage() {
-        System.out.println(
-                "Usage : HadoopDFSFileReadWrite <inputfile> <output file>");
-        System.exit(1);
     }
 
     public static FlowDef fileProcessing(Tap<?, ?, ?> source, Tap<?, ?, ?> sink,
@@ -124,12 +113,12 @@ public class Main {
                 .addSink(pipe, sink);
     }
 
+    // inner class for writing avro file based on input file
     public static class FileProcessing extends BaseOperation
             implements Function {
 
         public FileProcessing(Fields fieldDeclaration) throws IOException {
             super(1, fieldDeclaration);
-
         }
 
         @Override
@@ -159,7 +148,7 @@ public class Main {
                     }
                 }
             } catch (Exception e) {
-
+                throw new RuntimeException(e);
             }
             return text;
         }
