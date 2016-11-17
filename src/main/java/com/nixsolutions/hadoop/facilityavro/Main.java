@@ -62,7 +62,7 @@ public class Main {
         // Input file
         String inputPath = args[0];
         // Output file
-        // String outputPath = args[1];
+        String outputPath = args[1];
 
         Configuration config = new Configuration();
         config.addResource(new Path("/HADOOP_HOME/conf/core-site.xml"));
@@ -71,7 +71,7 @@ public class Main {
         FileSystem fs = FileSystem.get(config);
 
         // Path outputtmp = new Path("/sdfsdf/sdfsdf");
-        Path fileNamePath = new Path("vasya/facility.avro");
+        Path fileNamePath = new Path(outputPath + "vasya/facility.avro");
         FSDataOutputStream fsOut = null;
         try {
             if (fs.exists(fileNamePath)) {
