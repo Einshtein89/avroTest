@@ -71,7 +71,7 @@ public class Main {
         FileSystem fs = FileSystem.get(config);
 
         // Path outputtmp = new Path("/sdfsdf/sdfsdf");
-        Path fileNamePath = new Path(outputPath + "vasya/facility.avro");
+        Path fileNamePath = new Path("" + outputPath + "/facility.avro");
         FSDataOutputStream fsOut = null;
         try {
             if (fs.exists(fileNamePath)) {
