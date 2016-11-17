@@ -1,6 +1,5 @@
 package com.nixsolutions.hadoop.facilityavro;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
@@ -96,7 +95,7 @@ public class Main {
         Tap<?, ?, ?> sink = new Hfs(new TextDelimited(true, "\t"), "output",
                 SinkMode.REPLACE);
 
-        new File(outputPath).mkdir();
+        // new File(outputPath).mkdir();
         // create the job definition, and run it
         FlowDef flowDef = Main.fileProcessing(source, sink, fsOut);
         Flow wcFlow = flowConnector.connect(flowDef);
