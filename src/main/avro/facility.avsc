@@ -1,0 +1,29 @@
+{
+	"namespace":"com.nixsolutions.hadoop.model",
+	"type":"record",
+	"name":"Facility",
+	"fields":[
+		{
+			"name":"TruvenFacilityName",
+			"type":["string", "null"]
+		},
+		{
+			"name":"AcoId",
+			"type":["string", "null"]
+		},
+		{
+			"name":"TruvenFacilityId",
+			"type":["string", "null"]
+		},
+		{
+			"name":"CDAFacilityId",
+			"type":["string", "null"]
+		},
+		{
+			"name":"CdaClientCode",
+			"type":["string", "null"]
+		}
+		
+	]
+	
+}

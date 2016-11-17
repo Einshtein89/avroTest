@@ -1,0 +1,79 @@
+buildscript {
+  repositories {
+  jcenter()	
+    maven { 
+    url 'http://repo.spring.io/plugins-release' 
+    mavenCentral()
+    maven { url "http://clojars.org/repo" } // Required to automatically download this plugin
+    
+    }
+  }
+  dependencies {
+    classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.1'
+    classpath 'org.apache.maven:maven-artifact:2.2.1' // 3.x won't work
+    classpath 'org.apache.avro:avro-compiler:1.7.7' // Use Avro 1.7.7 to compile the Avro files
+    //(version 1.8.1 generates bad file!!)
+    classpath 'org.clojars.miguno:avro-gradle-plugin:1.7.7.2'
+   
+  }
+}
+
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'provided-base'
+apply plugin: 'avro-gradle-plugin'
+
+archivesBaseName = 'facility'
+
+ext.cascadingVersion = '3.1.0'
+ext.hadoopVersion = '2.6.0'
+
+// Change setting to 1.6 if you want to build with Java 6
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+dependencies {
+  compileAvro
+}
+
+compileAvro {
+  source = 'src/main/avro'
+  destinationDir = file("src/main/java")
+  // Uncomment the following line to explicitly set the Java type
+  // to be emitted for string schemas (here: java.lang.String).
+  stringType = 'String'
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven { url 'http://conjars.org/repo/' }
+}
+
+dependencies {
+  compile( group: 'cascading', name: 'cascading-core', version: cascadingVersion )
+  compile( group: 'cascading', name: 'cascading-local', version: cascadingVersion )
+  compile( group: 'cascading', name: 'cascading-hadoop2-mr1', version: cascadingVersion )
+  compile( group: 'cascading', name: 'cascading-expression', version: cascadingVersion )
+
+  provided( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoopVersion )
+  provided( group: 'org.apache.hadoop', name: 'hadoop-client', version: hadoopVersion )
+  provided( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoopVersion )
+}
+
+jar {
+  description = "Assembles a Hadoop ready jar file"
+  doFirst {
+    into( 'lib' ) {
+      from { configurations.compile.minus( [configurations.provided] ) }
+    }
+  }
+
+  manifest {
+    attributes( "Main-Class": "com/nixsolutions/hadoop/facilityavro/Main" )
+  }
+  
+  
+}
