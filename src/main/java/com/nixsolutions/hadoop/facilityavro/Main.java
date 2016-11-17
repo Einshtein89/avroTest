@@ -63,7 +63,7 @@ public class Main {
         // Input file
         String inputPath = args[0];
         // Output file
-        String outputPath = args[1];
+        // String outputPath = args[1];
 
         Configuration config = new Configuration();
         config.addResource(new Path("/HADOOP_HOME/conf/core-site.xml"));
@@ -93,7 +93,7 @@ public class Main {
 
         // Create a sink tap to write to the Hfs; by default, TextDelimited
         // writes all fields out
-        Tap<?, ?, ?> sink = new Hfs(new TextDelimited(true, "\t"), outputPath,
+        Tap<?, ?, ?> sink = new Hfs(new TextDelimited(true, "\t"), "output",
                 SinkMode.REPLACE);
 
         new File(outputPath).mkdir();
