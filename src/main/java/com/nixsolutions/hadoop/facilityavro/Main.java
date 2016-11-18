@@ -78,7 +78,7 @@ public class Main {
             }
             fsOut = fs.create(fileNamePath);
         } catch (Exception e) {
-            // TODO: handle exception
+            throw new RuntimeException(e);
         }
         // create the source tap
         Tap<?, ?, ?> source = new Hfs(new TextLine(), inputPath);
@@ -152,7 +152,7 @@ public class Main {
                     }
                 }
             } catch (Exception e) {
-
+                throw new RuntimeException(e);
             }
             return text;
         }
